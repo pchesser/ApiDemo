@@ -19,5 +19,21 @@ namespace Data
         {
             return await _context.Tests.FindAsync(id);
         }
+
+        public async Task<Test> AddTestAsync(Test test)
+        {
+            try
+            {
+                await _context.Tests.AddAsync(test);
+                await _context.SaveChangesAsync();
+                return test;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+            
+        }
     }
 }

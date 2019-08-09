@@ -4,6 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Data;
 using DomainServices.Abstractions;
+using DomainServices.ApiModels;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ApiDemo.Controllers
@@ -20,7 +22,7 @@ namespace ApiDemo.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Test>> Get(int id)
+        public async Task<ActionResult<TestResponseModel>> Get(int id)
         {
             var test = await _testService.GetByIdAsync(id);
             if (test == null)
@@ -32,9 +34,18 @@ namespace ApiDemo.Controllers
         }
 
         [HttpPost]
-        public async Task Post([FromBody] Test test)
+        public async Task<ActionResult> Post([FromBody] AddTestModel model)
         {
-
+            try
+            {
+                var added = await _testService.AddTestAsync(model);
+                return Created(Url.Action("Get", "Tests",new {added.Id},null, Request.Host.ToUriComponent()), added);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
         }
     }
 }

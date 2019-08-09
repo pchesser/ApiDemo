@@ -1,4 +1,5 @@
-﻿using Data.Abstractions;
+﻿using System.Threading.Tasks;
+using Data.Abstractions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Data
@@ -6,6 +7,10 @@ namespace Data
     public class TestContext : DbContext, ITestContext
     {
         public DbSet<Test> Tests { get; set; }
+        public async Task SaveChangesAsync()
+        {
+            await base.SaveChangesAsync();
+        }
 
         //Note I would never hard code a connection string in production, only doing this for demo purposes
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -23,6 +28,12 @@ namespace Data
                 entity.Property(e => e.Name)
                     .IsRequired()
                     .HasColumnName("Name");
+                entity.Property(e => e.PhoneNumber)
+                    .IsRequired(false)
+                    .HasColumnName("PhoneNumber");
+                entity.Property(e => e.State)
+                    .IsRequired(false)
+                    .HasColumnName("State");
             });
             modelBuilder.HasSequence("test_id_seq", "public");
         }

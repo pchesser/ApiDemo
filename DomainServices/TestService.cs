@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Data;
 using Data.Abstractions;
 using DomainServices.Abstractions;
+using DomainServices.ApiModels;
 
 namespace DomainServices
 {
@@ -15,24 +16,39 @@ namespace DomainServices
             _testRepo = testRepo;
         }
 
-        public async Task<Test> GetByIdAsync(int id)
+        public async Task<TestResponseModel> GetByIdAsync(int id)
         {
-            return await _testRepo.GetByIdAsync(id);
+            if (id < 1)
+            {
+                throw new InvalidOperationException("id must be greater than 0");
+            }
+            var test = await _testRepo.GetByIdAsync(id);
+            return new TestResponseModel
+            {
+                Id = test.Id,
+                Name = test.Name,
+                PhoneNumber = test.PhoneNumber,
+                State = test.State
+            };
         }
 
-        public async Task AddTestAsync(Test test)
+        public Task<Test> AddTestAsync(AddTestModel model)
         {
-            if (string.IsNullOrWhiteSpace(test.Name))
+            if (model.Name == null)
             {
-                throw new InvalidOperationException("Name can not be null");
+                throw new InvalidOperationException("name cannot be null");
             }
 
-            if (string.IsNullOrWhiteSpace(test.Data))
+            var test = new Test
             {
-                throw new InvalidOperationException("Data can not be null");
-            }
+                Name = model.Name,
+                State = model.State,
+                PhoneNumber = model.PhoneNumber,
+                Data = "{\"this\":\"is a test\"}"
+            };
 
-
+            var created = _testRepo.AddTestAsync(test);
+            return created;
         }
     }
 }
